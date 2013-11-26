@@ -40,7 +40,7 @@ public class GeneratorServiceImpl implements GeneratorService {
                                 + outputFile.getAbsolutePath()
                                 + " was not deleted after an exception has occured.");
             }
-            throw new Exception(e);
+            throw new Exception(e);//Вызов исключения
         }
 
         return outputFile;
