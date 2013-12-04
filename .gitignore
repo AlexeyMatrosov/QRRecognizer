@@ -6,3 +6,4 @@
 target/*
 config/*\.properties
 /target
+/test-output
