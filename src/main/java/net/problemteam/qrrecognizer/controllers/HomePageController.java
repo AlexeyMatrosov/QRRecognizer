@@ -20,7 +20,7 @@ import org.springframework.web.multipart.MultipartFile;
 @Controller
 public class HomePageController {
     private static final Logger log = Logger
-                    .getLogger(HomePageController.class);
+            .getLogger(HomePageController.class);
 
     @Value("${qrrecognizer.uploadPath}")
     private String imagesDirectoryPath;
@@ -29,25 +29,48 @@ public class HomePageController {
     private String generatedImagesPath;
 
     @Autowired
+    private UniqueFileFactory uniqueFileFactory;
+
+    @Autowired
     private RecognizerService recognizerService;
+
+    public void setImagesDirectoryPath(String imagesDirectoryPath) {
+        this.imagesDirectoryPath = imagesDirectoryPath;
+    }
+
+    public void setGeneratedImagesPath(String generatedImagesPath) {
+        this.generatedImagesPath = generatedImagesPath;
+    }
+
+    public void setRecognizerService(RecognizerService recognizerService) {
+        this.recognizerService = recognizerService;
+    }
+
+    public void setGeneratorService(GeneratorService generatorService) {
+        this.generatorService = generatorService;
+    }
+
+    public void setUniqueFileFactory(UniqueFileFactory uniqueFileFactory) {
+        this.uniqueFileFactory = uniqueFileFactory;
+    }
 
     @Autowired
     private GeneratorService generatorService;
 
     @RequestMapping(value = { "/", "/home" }, method = RequestMethod.GET)
-    public String homePage(Model model) throws IOException {
+    public String homePage() {
         return "index";
     }
 
     @RequestMapping(value = "/decode", method = RequestMethod.POST)
     public String qrDecode(
-                    @RequestParam("fileToDecode") MultipartFile fileToDecode,
-                    Model model) throws Exception {
+            @RequestParam("fileToDecode") MultipartFile fileToDecode,
+            Model model) throws Exception {
 
         File qrCodeFile = null;
         do {
-            qrCodeFile = UniqueFileFactory.createUniqueFile(
-                            imagesDirectoryPath, "/qrcode-", "");
+            qrCodeFile = uniqueFileFactory.createUniqueFile(
+                    imagesDirectoryPath, "/qrcode-", "");
         } while (qrCodeFile.exists());
         if (!qrCodeFile.createNewFile()) {
             throw new IOException("cannot create temporary file");
@@ -59,7 +82,7 @@ public class HomePageController {
 
         if (!qrCodeFile.delete()) {
             log.error("Temporary file " + qrCodeFile.getAbsolutePath()
-                            + " has not been deleted.");
+                    + " has not been deleted.");
         }
 
         model.addAttribute("decodedText", decodedText);
@@ -68,13 +91,13 @@ public class HomePageController {
 
     @RequestMapping(value = "/encode", method = RequestMethod.POST)
     public String qrEncode(@RequestParam("textToEncode") String textToEncode,
-                    Model model) throws Exception {
+            Model model) throws Exception {
 
         File encodedImageFile = this.generatorService
-                        .generateQrCode(textToEncode);
+                .generateQrCode(textToEncode);
 
         model.addAttribute("encodedImagePath",
-                        "/generated/" + encodedImageFile.getName());
+                "/generated/" + encodedImageFile.getName());
         return "encoded_image";
     }
 }
